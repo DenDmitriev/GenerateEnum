@@ -1,7 +1,6 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
-// swift-tools-version: 6.0
 import PackageDescription
 import CompilerPluginSupport
 
@@ -12,10 +11,6 @@ let package = Package(
         .library(
             name: "GenerateEnum",
             targets: ["GenerateEnum"]
-        ),
-        .executable(
-            name: "GenerateEnumClient",
-            targets: ["GenerateEnumClient"]
         ),
     ],
     dependencies: [
@@ -35,12 +30,6 @@ let package = Package(
         .target(
             name: "GenerateEnum",
             dependencies: ["GenerateEnumMacros"]
-        ),
-
-        // Тестовый клиент макроса
-        .executableTarget(
-            name: "GenerateEnumClient",
-            dependencies: ["GenerateEnum"]
         ),
 
         // Плагин компилятора (должен быть в `Plugins/`)
