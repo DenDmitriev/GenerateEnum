@@ -21,27 +21,30 @@ public struct GenerateEnumMacro: MemberMacro {
         
         let baseClass = baseArg.baseName.text
         let enumName = nameArg.segments.description.replacingOccurrences(of: "\"", with: "")
+
+        // === 1. Ищем все классы в текущем файле ===
+        var subclassDecls: [String] = []
         
-        // Получаем все вложенные классы внутри базового класса
-        guard let baseDecl = declaration.as(EnumDeclSyntax.self) else {
-            throw MacroError.message("Expected to be used on an enum")
-        }
-        
-        let subclassDecls = baseDecl.memberBlock.members.compactMap { member -> String? in
-            guard let classDecl = member.decl.as(ClassDeclSyntax.self) else { return nil }
-            return classDecl.name.text
+        if let sourceFile = declaration.parent?.as(SourceFileSyntax.self) {
+            for statement in sourceFile.statements {
+                guard let classDecl = statement.item.as(ClassDeclSyntax.self),
+                      let inheritanceClause = classDecl.inheritanceClause,
+                      inheritanceClause.inheritedTypes.contains(where: { $0.type.description == baseClass })
+                else { continue }
+                
+                subclassDecls.append(classDecl.name.text)
+            }
         }
         
         guard !subclassDecls.isEmpty else {
-            throw MacroError.message("No subclasses found in \(baseClass)")
+            throw MacroError.message("No subclasses found for \(baseClass)")
         }
         
-        // Генерируем кейсы
+        // === 2. Генерируем enum ===
         let cases = subclassDecls.map { subclass in
             "case \(subclass.lowercased())(\(baseClass).\(subclass))"
         }.joined(separator: "\n")
         
-        // Генерируем init?(shared:)
         let initCases = subclassDecls.map { subclass in
             "case let \(subclass.lowercased()) as \(baseClass).\(subclass): return .\(subclass.lowercased())(\(subclass.lowercased()))"
         }.joined(separator: "\n")
