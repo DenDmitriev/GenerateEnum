@@ -28,5 +28,17 @@ let package = Package(
             name: "GenerateEnum",
             dependencies: ["GenerateEnumMacros"]
         ),
+        .target(
+            name: "ObjCClasses",
+            path: "Tests/ObjCClasses", // Указываем папку с ObjC-кодом
+            publicHeadersPath: "."
+        ),
+        .testTarget(
+            name: "GenerateEnumTests",
+            dependencies: ["GenerateEnum", "ObjCClasses"], // Добавляем ObjCClasses как зависимость
+            cSettings: [
+                .headerSearchPath(".")
+            ]
+        )
     ]
 )
