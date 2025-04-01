@@ -6,7 +6,7 @@ import CompilerPluginSupport
 
 let package = Package(
     name: "GenerateEnum",
-    platforms: [.macOS(.v12), .iOS(.v15)], // Минимальная версия Swift Macros API
+    platforms: [.macOS(.v12), .iOS(.v15)],
     products: [
         .library(
             name: "GenerateEnum",
@@ -14,10 +14,9 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "601.0.0"),
     ],
     targets: [
-        // Макросная реализация
         .macro(
             name: "GenerateEnumMacros",
             dependencies: [
@@ -25,17 +24,8 @@ let package = Package(
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
             ]
         ),
-
-        // Библиотека с объявлением макроса
         .target(
             name: "GenerateEnum",
-            dependencies: ["GenerateEnumMacros"]
-        ),
-
-        // Плагин компилятора (должен быть в `Plugins/`)
-        .plugin(
-            name: "GenerateEnumPlugin",
-            capability: .buildTool(),
             dependencies: ["GenerateEnumMacros"]
         ),
     ]
